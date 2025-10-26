@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sentence Trainers – Main</title>
+  <style>
+    :root { --max: 860px; --gap: 14px; }
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; margin: 0; line-height: 1.55; }
+    header { max-width: var(--max); margin: 0 auto; padding: 20px 16px; }
+    main { max-width: var(--max); margin: 0 auto; padding: 0 16px 24px; }
+    h1 { font-size: 1.5rem; margin: 0 0 6px; }
+    p.sub { color: #666; margin-top: 4px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--gap); margin-top: 14px; }
+    .card { border: 1px solid #e3e3e3; border-radius: 14px; padding: 16px; background: #fafafa; display: flex; flex-direction: column; gap: 10px; }
+    .card h2 { font-size: 1.1rem; margin: 0; }
+    .card p { margin: 0; color: #555; }
+    .actions { margin-top: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+    a.btn { display: inline-block; padding: 10px 14px; border: 1px solid #bbb; border-radius: 10px; background: white; text-decoration: none; color: #111; }
+    a.btn:hover { background: #f3f3f3; }
+    footer { max-width: var(--max); margin: 0 auto; padding: 18px 16px 40px; color: #777; font-size: .92rem; }
+    code { background: #f1f1f1; padding: 2px 6px; border-radius: 6px; }
+    @media (prefers-color-scheme: dark) {
+      body { background: #0b0b0b; color: #eaeaea; }
+      .card { background: #121212; border-color: #2b2b2b; }
+      .card p { color: #bdbdbd; }
+      a.btn { background: #1b1b1b; color: #eee; border-color: #3a3a3a; }
+      a.btn:hover { background: #222; }
+      p.sub, footer { color: #aaa; }
+      code { background: #222; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>영/한 문장 트레이너 – 메인</h1>
+    <p class="sub">한 페이지 웹앱 모음. 같은 폴더에 있는 파일로 바로 연결됩니다.</p>
+  </header>
+
+  <main>
+    <div class="grid">
+      <section class="card">
+        <h2>랜덤 빈칸 채우기</h2>
+        <p><code>trainer.html</code> — en과 겹치는 단어를 N개 빈칸으로. 실시간 채점/정답 토글.</p>
+        <div class="actions">
+          <a class="btn" href="trainer.html">열기</a>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>첫 글자 빈칸 채우기</h2>
+        <p><code>trainer2.html</code> — 겹치는 단어의 첫 글자만 남기고 나머지를 입력. Enter로 다음 칸 이동.</p>
+        <div class="actions">
+          <a class="btn" href="trainer2.html">열기</a>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>문장 채우기(청크)</h2>
+        <p><code>trainer3.html</code> — 템플릿의 고정 구간(겹치는 문장)을 입력칸으로. 공백 트림 비교 가능.</p>
+        <div class="actions">
+          <a class="btn" href="trainer3.html">열기</a>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div>Tip: GitHub Pages 루트에 이 파일을 <code>index.html</code>로 업로드하면 <code>/</code>만 열어도 메인이 바로 보입니다.</div>
+  </footer>
+</body>
+</html>
