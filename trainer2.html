@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sentence Trainer — Enter로 다음 입력칸</title>
+  <title>Sentence Trainer — First letter inside input</title>
   <style>
     :root { --gap: 10px; }
     * { box-sizing: border-box; }
@@ -20,8 +20,8 @@
     .full { margin-top: 6px; color: #666; font-size: .95rem; display: none; white-space: pre-wrap; }
     .masked { white-space: pre-wrap; }
     .chunk { display: inline; }
-    .prefix { font-weight: 600; }
-    input.answer { display: inline-block; width: min(220px, 48vw); padding: 4px 6px; margin: 0 2px; border-radius: 6px; border: 1px solid #bbb; }
+    /* <<< You can edit width here >>> */
+    input.answer { display: inline-block; width: min(150px, 48vw); padding: 4px 6px; margin: 0 2px; border-radius: 6px; border: 1px solid #bbb; }
     input.answer.ok { border-color: #0a8; background: rgba(10,136,120,.06); }
     input.answer.bad { border-color: #c33; }
     @media (prefers-color-scheme: dark) {
@@ -43,12 +43,12 @@
 </head>
 <body>
   <header>
-    <h1>영/한 문장 — 첫 글자 고정 + 입력 + Enter 이동</h1>
+    <h1>영/한 문장 — 첫 글자 입력칸 내부 + Enter 이동</h1>
     <div class="controls">
       <button id="toggleBtn">정답 보기/숨기기</button>
       <span class="status" id="globalStatus">전체 정답: 0 / 0</span>
     </div>
-    <p class="legend">규칙: <code>en_sample</code>과 <code>en</code>에 모두 등장하는 단어만 대상. 대상 단어는 <strong>첫 글자만 고정</strong>으로 보이고, 나머지 영문자를 입력칸으로 채웁니다. <kbd>Enter</kbd>를 누르면 다음 입력칸으로 이동합니다(마지막이면 그대로 유지).</p>
+    <p class="legend">대상 단어는 <strong>첫 글자가 입력칸 안에 미리 채워져</strong> 보입니다. 입력을 시작하면 그 글자는 자동으로 덮어쓰기 됩니다. 채점은 <em>첫 글자를 제외한 나머지 철자</em> 기준입니다.</p>
   </header>
 
   <main id="root"></main>
@@ -98,7 +98,8 @@
       const lead = s.slice(0, firstIdx);
       const letters = s.replace(/[^A-Za-z]/g, "");
       const first = letters.slice(0,1);
-      const remainder = letters.slice(1);
+      // const remainder = letters.slice(1);
+      const remainder = letters;
       const trail = s.slice(lastIdx+1);
       return {lead, first, remainder, trail};
     }
@@ -142,25 +143,31 @@
           if (maskIdx.has(wi)) {
             const {lead, first, remainder, trail} = splitToken(tok);
             if (lead) masked.append(lead);
-            const span = document.createElement("span");
-            span.className = "chunk";
-            const pref = document.createElement("span");
-            pref.className = "prefix";
-            pref.textContent = first || "";
-            span.appendChild(pref);
+
+            // Input holds ONLY the remainder as the expected answer, but we prefill FIRST letter
             const inp = document.createElement("input");
             inp.type = "text";
             inp.className = "answer";
+            inp.value = first || ""; // show first letter inside input
+            inp.setAttribute("data-first", (first || "").toLowerCase());
             inp.setAttribute("data-ans", (remainder || "").toLowerCase());
-            if (remainder && remainder.length > 0) inp.maxLength = remainder.length;
-            // 체크
-            inp.addEventListener("input", () => {
+            // if (remainder && remainder.length > 0) inp.maxLength = remainder.length; // user types remainder only
+
+            // Auto-select on focus/click so typing overwrites the prefilled first letter
+            const selectAll = () => { try { inp.select(); } catch(_){} };
+            inp.addEventListener("focus", selectAll);
+            inp.addEventListener("click", selectAll);
+
+            // Check remainder only
+            function check() {
               const ok = inp.value.trim().toLowerCase() === inp.dataset.ans;
               inp.classList.toggle("ok", ok);
               inp.classList.toggle("bad", !ok && inp.value.length > 0);
               updateGlobal();
-            });
-            // Enter로 다음 입력칸 이동
+            }
+            inp.addEventListener("input", check);
+
+            // Enter -> next
             inp.addEventListener("keydown", (e) => {
               if (e.key === "Enter") {
                 e.preventDefault();
@@ -172,8 +179,8 @@
                 }
               }
             });
-            span.appendChild(inp);
-            masked.appendChild(span);
+
+            masked.appendChild(inp);
             if (trail) masked.append(trail);
           } else {
             masked.append(tok);
