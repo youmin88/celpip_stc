@@ -14,13 +14,14 @@ with open(out_file, "w", encoding="utf-8") as f:
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sentence Trainer — Chunk Inputs for OVERLAP</title>
+  <title>Sentence Trainer — Chunk Inputs (robust)</title>
   <style>
     :root { --gap: 10px; }
     * { box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; margin: 0; line-height: 1.5; }
     header, main { max-width: 900px; margin: 0 auto; padding: 16px; }
     header h1 { font-size: 1.4rem; margin: 0 0 8px; }
+    header {  position: sticky;  top: 0;  z-index: 1000;  background: #fff;  border-bottom: 1px solid #e5e5e5; }
     .controls { display: flex; flex-wrap: wrap; gap: var(--gap); align-items: center; }
     button { padding: 8px 12px; border: 1px solid #bbb; border-radius: 8px; background: #f7f7f7; }
     button:active { transform: translateY(1px); }
@@ -33,6 +34,7 @@ with open(out_file, "w", encoding="utf-8") as f:
     input.answer { display: inline-block; width: min(320px, 60vw); padding: 4px 6px; margin: 0 2px; border-radius: 6px; border: 1px solid #bbb; }
     input.answer.ok { border-color: #0a8; background: rgba(10,136,120,.06); }
     input.answer.bad { border-color: #c33; }
+    .note { font-size: .85rem; color: #777; margin-top: 6px; }
     @media (prefers-color-scheme: dark) {
       body { background: #0b0b0b; color: #eaeaea; }
       .item { border-color: #333; }
@@ -41,27 +43,20 @@ with open(out_file, "w", encoding="utf-8") as f:
       .ko { color: #ddd; }
       .status { color: #aaa; }
       input.answer { border-color: #555; background: #0f0f0f; color: #eee; }
+      .note { color: #aaa; }
     }
-    .legend { font-size: .9rem; color: #666; }
-    .legend code { background: #eee; padding: 2px 6px; border-radius: 4px; }
-    @media (prefers-color-scheme: dark) {
-      .legend { color: #aaa; }
-      .legend code { background: #222; }
-    }
+    header { position: sticky; top: 0; z-index: 1000; background: #fff; border-bottom: 1px solid #e5e5e5; }
+    @media (prefers-color-scheme: dark) { header { background: #0b0b0b; border-bottom-color: #222; } }
   </style>
 </head>
 <body>
   <header>
-    <h1>영/한 문장 — 겹치는 청크(고정 구간) 입력</h1>
+    <h1>영/한 문장 — 겹치는 고정 구간(OVERLAP) 입력</h1>
     <div class="controls">
       <button id="toggleBtn">정답 보기/숨기기</button>
       <span class="status" id="globalStatus">전체 정답: 0 / 0</span>
     </div>
-    <p class="legend">
-      규칙: <code>en</code> 템플릿의 <strong>고정 구간(= ~가 아닌 부분)</strong>을 <code>en_sample</code>에서 찾아
-      그 부분을 <strong>입력칸</strong>으로 만듭니다. 즉, <em>겹치는 문장</em>이 빈칸이 됩니다.
-      (입력 글자수 제한 없음, Enter로 다음 칸 이동)
-    </p>
+    <p class="note">고정 구간을 대소문자 무시로 찾아 빈칸으로 만듭니다. 못 찾으면 임시로 '~' 사이 청크 빈칸으로 대체합니다.</p>
   </header>
 
   <main id="root"></main>
@@ -71,53 +66,68 @@ with open(out_file, "w", encoding="utf-8") as f:
     f.write("""</script>
 
   <script>
-    // Find FIXED-part spans (overlap) of en template in enSample.
-    function findOverlapFixedSpans(enSample, enTemplate) {
+    function findFixedSpansCI(enSample, enTemplate) {
       const parts = String(enTemplate || "").split("~");
       const s = String(enSample || "");
-      const spans = []; // fixed segments as inputs
-      let pos = 0;
-
-      function indexOfFrom(hay, needle, from) {
-        if (!needle) return from;
-        return hay.indexOf(needle, from);
-        }
-
-      // For each fixed part, in order, locate it and create a span for that exact substring.
-      for (let i=0; i<parts.length; i++) {
+      const sL = s.toLowerCase();
+      const spans = [];
+      let posL = 0;
+      for (let i=0;i<parts.length;i++) {
         const p = parts[i];
-        if (p === "") {
-          // Empty fixed piece (due to leading/trailing "~" or consecutive "~~") -> skip
-          continue;
-        }
-        const idx = indexOfFrom(s, p, pos);
-        if (idx === -1) {
-          // If any fixed part is not found, we cannot confidently align; return empty inputs
-          return [];
-        }
-        spans.push({start: idx, end: idx + p.length, text: s.slice(idx, idx + p.length)});
-        pos = idx + p.length;
+        if (!p) continue;
+        const pL = p.toLowerCase();
+        const idxL = sL.indexOf(pL, posL);
+        if (idxL === -1) return [];
+        spans.push({start: idxL, end: idxL + p.length, text: s.slice(idxL, idxL + p.length)});
+        posL = idxL + p.length;
       }
       return spans;
     }
 
-    function renderMaskedLine(enSample, fixedSpans) {
+    function findGapChunks(enSample, enTemplate) {
+      const parts = String(enTemplate || "").split("~");
+      const s = String(enSample || "");
+      const spans = [];
+      let pos = 0;
+      function indexOfFrom(hay, needle, from) {
+        if (!needle) return from;
+        return hay.indexOf(needle, from);
+      }
+      const matches = [];
+      for (let i=0;i<parts.length;i++) {
+        const p = parts[i];
+        const idx = indexOfFrom(s, p, pos);
+        if (idx === -1) return [];
+        matches.push({start: idx, end: idx + p.length});
+        pos = idx + p.length;
+      }
+      for (let i=0;i<matches.length-1;i++) {
+        const left = matches[i], right = matches[i+1];
+        const start = left.end, end = right.start;
+        if (end >= start) spans.push({start, end, text: s.slice(start, end)});
+      }
+      if (parts.length > 0 && parts[0] === "") {
+        const firstStart = matches[0].start;
+        if (firstStart > 0) spans.unshift({start: 0, end: firstStart, text: s.slice(0, firstStart)});
+      }
+      if (parts.length > 0 && parts[parts.length-1] === "") {
+        const lastEnd = matches[matches.length-1].end;
+        if (lastEnd < s.length) spans.push({start: lastEnd, end: s.length, text: s.slice(lastEnd)});
+      }
+      return spans;
+    }
+
+    function renderMaskedLine(enSample, spans, noteFallback) {
       const container = document.createElement("div");
       container.className = "masked";
       let cursor = 0;
-      // sort by start index
-      fixedSpans.sort((a,b)=>a.start-b.start);
-
-      for (const span of fixedSpans) {
-        // append plain segment BEFORE fixed span
+      spans.sort((a,b)=>a.start-b.start);
+      for (const span of spans) {
         if (span.start > cursor) container.append(enSample.slice(cursor, span.start));
-
-        // input for the fixed (overlap) part
         const inp = document.createElement("input");
         inp.type = "text";
         inp.className = "answer";
-        inp.setAttribute("data-ans", span.text); // compare as-is (trim 안함)
-        // live check
+        inp.setAttribute("data-ans", span.text);
         function check() {
           const ok = inp.value.trim() === inp.dataset.ans.trim();
           inp.classList.toggle("ok", ok);
@@ -125,7 +135,6 @@ with open(out_file, "w", encoding="utf-8") as f:
           updateGlobal();
         }
         inp.addEventListener("input", check);
-        // Enter -> next
         inp.addEventListener("keydown", (e) => {
           if (e.key === "Enter") {
             e.preventDefault();
@@ -138,13 +147,15 @@ with open(out_file, "w", encoding="utf-8") as f:
           }
         });
         container.appendChild(inp);
-
-        // advance cursor after the fixed span
         cursor = span.end;
       }
-
-      // append remaining tail AFTER last fixed span
       if (cursor < enSample.length) container.append(enSample.slice(cursor));
+      if (noteFallback) {
+        const n = document.createElement("div");
+        n.className = "note";
+        n.textContent = "고정 구간을 찾지 못해 임시로 청크(~) 구간을 빈칸으로 대체했습니다.";
+        container.appendChild(n);
+      }
       return container;
     }
 
@@ -164,13 +175,18 @@ with open(out_file, "w", encoding="utf-8") as f:
         ko.textContent = item.ko || "";
         sec.appendChild(ko);
 
-        const fixedSpans = findOverlapFixedSpans(item.en_sample || "", item.en || "");
-        const masked = renderMaskedLine(item.en_sample || "", fixedSpans);
+        let spans = findFixedSpansCI(item.en || "", item.en_sample || "");
+        let usedFallback = false;
+        if (!spans.length) {
+          spans = findGapChunks(item.en_sample || "", item.en || "");
+          usedFallback = true;
+        }
+        const masked = renderMaskedLine(item.en || "", spans, usedFallback);
         sec.appendChild(masked);
 
         const full = document.createElement("div");
         full.className = "full";
-        full.textContent = item.en_sample || "";
+        full.textContent = item.en || "";
         if (reveal) full.style.display = "block";
         sec.appendChild(full);
 
@@ -181,7 +197,7 @@ with open(out_file, "w", encoding="utf-8") as f:
 
     function updateGlobal() {
       const inputs = Array.from(document.querySelectorAll("input.answer"));
-      const correct = inputs.filter(inp => inp.value === inp.dataset.ans).length;
+      const correct = inputs.filter(inp => inp.value.trim() === inp.dataset.ans.trim()).length;
       globalStatus.textContent = "전체 정답: " + correct + " / " + inputs.length;
     }
 

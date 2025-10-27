@@ -21,6 +21,7 @@ with open(out_file, "w", encoding="utf-8") as f:
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; margin: 0; line-height: 1.5; }
     header, main { max-width: 900px; margin: 0 auto; padding: 16px; }
     header h1 { font-size: 1.4rem; margin: 0 0 8px; }
+    header {  position: sticky;  top: 0;  z-index: 1000;  background: #fff;  border-bottom: 1px solid #e5e5e5; }
     .controls { display: flex; flex-wrap: wrap; gap: var(--gap); align-items: center; }
     button { padding: 8px 12px; border: 1px solid #bbb; border-radius: 8px; background: #f7f7f7; }
     button:active { transform: translateY(1px); }
@@ -131,7 +132,7 @@ with open(out_file, "w", encoding="utf-8") as f:
 
         const masked = document.createElement("div");
         masked.className = "masked";
-        const {tS, maskIdx} = overlappingWordIndices(item.en_sample || "", item.en || "");
+        const {tS, maskIdx} = overlappingWordIndices(item.en || "", item.en_sample || "");
 
         for (let i=0;i<tS.raw.length;i++) {
           const tok = tS.raw[i];

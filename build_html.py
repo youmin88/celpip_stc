@@ -22,6 +22,7 @@ with open(out_file, "w", encoding="utf-8") as f:
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; margin: 0; line-height: 1.5; }
     header, main { max-width: 900px; margin: 0 auto; padding: 16px; }
     header h1 { font-size: 1.4rem; margin: 0 0 8px; }
+    header {  position: sticky;  top: 0;  z-index: 1000;  background: #fff;  border-bottom: 1px solid #e5e5e5; }
     .controls { display: flex; flex-wrap: wrap; gap: var(--gap); align-items: center; }
     .controls label { display: flex; align-items: center; gap: 8px; }
     input[type=number] { width: 90px; padding: 6px 8px; }
@@ -148,7 +149,7 @@ with open(out_file, "w", encoding="utf-8") as f:
         ko.textContent = item.ko || "";
         block.appendChild(ko);
 
-        const {tS, sWords, content, functionals} = overlapCandidates(item.en_sample || "", item.en || "");
+        const {tS, sWords, content, functionals} = overlapCandidates(item.en || "", item.en_sample || "");
         const chosenIdx = content.slice(0, blankN).concat(functionals.slice(0, Math.max(0, blankN - content.length)));
 
         const sample = document.createElement("div");

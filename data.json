@@ -7,12 +7,12 @@
   {
     "en": "I am writing to inform you of the difficulties I experienced with my recent internet installation.",
     "ko": "최근 인터넷 설치 과정에서 겪은 어려움을 알려드리기 위해 이렇게 글을 씁니다.",
-    "en_sample": "I am writing to you to inform you of the difficulties  I experienced with ~"
+    "en_sample": "I am writing to inform you of the difficulties I experienced with ~"
   },
   {
     "en": "I am writing this email in response to your earlier email regarding the payment issue.",
     "ko": "이 메일은 귀하가 이전에 보내주신 요청에 대한 회신입니다.",
-    "en_sample": "I am writing this email in response to your earlier email regarding  ~"
+    "en_sample": "I am writing this email in response to your earlier email regarding ~"
   },
   {
     "en": "I noticed on the day that the package arrived damaged.",
@@ -82,7 +82,7 @@
   {
     "en": "I am writing to suggest some measures that the company can adopt so that it can operate more efficiently.",
     "ko": "회사가 효율적이 되도록 취할 수 있는 몇 가지 조치를 제안드리고자 합니다.",
-    "en_sample": "I am writing to suggest some measures that ~ can adopt, so that it can be ~"
+    "en_sample": "I am writing to suggest some measures that ~ can adopt so that it can ~"
   },
   {
     "en": "Unfortunately, I noticed that there were several management issues.",
@@ -122,7 +122,7 @@
   {
     "en": "I had an enjoyable time interacting with the community during such an important celebration.",
     "ko": "뜻깊은 행사에서 지역사회와 교류하며 즐거운 시간을 보냈습니다.",
-    "en_sample": "I had an enjoyable time interacting with the community on such an important celebration."
+    "en_sample": "I had an enjoyable time interacting with the community during such an important celebration."
   },
   {
     "en": "I could tell that he was more concerned about keeping the schedule than ensuring customer satisfaction.",
@@ -132,7 +132,7 @@
   {
     "en": "After following Daniel’s recommendations, the issue was resolved successfully.",
     "ko": "Daniel의 권장사항을 따른 후 문제는 해결되었습니다.",
-    "en_sample": "After following Daniel's recommendations, ~"
+    "en_sample": "After following ~ recommendations, the issue was resolved successfully."
   },
   {
     "en": "Thank you for your consideration and I look forward to another wonderful event next year.",
