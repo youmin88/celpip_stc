@@ -387,11 +387,6 @@
     "en_sample": "For those reasons,"
   },
   {
-    "en": "in my opinion",
-    "ko": "내 생각에는,",
-    "en_sample": "in my opinion"
-  },
-  {
     "en": "I would recommend that",
     "ko": "나는 ~를 추천하고 싶다,",
     "en_sample": "I would recommend that"
@@ -558,9 +553,19 @@
     const globalStatus = document.getElementById("globalStatus");
     let reveal = false;
 
+    function shuffleInPlace(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
     function renderAll(DATA) {
       root.innerHTML = "";
-      DATA.forEach(item => {
+      const items = shuffleInPlace([...DATA]);
+      items.forEach(item => {
+      //DATA.forEach(item => {
         const sec = document.createElement("section");
         sec.className = "item";
 

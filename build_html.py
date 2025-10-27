@@ -113,6 +113,15 @@ with open(out_file, "w", encoding="utf-8") as f:
       }
       return {raw, words, map};
     }
+    
+    function sampleRandom(arr, k) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a.slice(0, k);
+    }
 
     function overlapCandidates(enSample, en) {
       const tS = tokenize(enSample || "");
@@ -139,9 +148,19 @@ with open(out_file, "w", encoding="utf-8") as f:
     const statusEl = document.getElementById("status");
     let reveal = false;
 
+    function shuffleInPlace(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
     function build(blankN) {
       root.innerHTML = "";
-      DATA.forEach((item) => {
+      const items = shuffleInPlace([...DATA]);
+      //DATA.forEach((item) => {
+      items.forEach((item) => {
         const block = document.createElement("section");
         block.className = "item";
 
@@ -150,8 +169,11 @@ with open(out_file, "w", encoding="utf-8") as f:
         ko.textContent = item.ko || "";
         block.appendChild(ko);
 
-        const {tS, sWords, content, functionals} = overlapCandidates(item.en || "", item.en_sample || "");
-        const chosenIdx = content.slice(0, blankN).concat(functionals.slice(0, Math.max(0, blankN - content.length)));
+        //const {tS, sWords, content, functionals} = overlapCandidates(item.en || "", item.en_sample || "");
+        const {tS, sWords, content, functionals} = overlapCandidates(item.en, item.en_sample);
+        const pool = [...content, ...functionals];
+        const chosenIdx = sampleRandom(pool, Math.min(blankN, pool.length));
+        //const chosenIdx = content.slice(0, blankN).concat(functionals.slice(0, Math.max(0, blankN - content.length)));
 
         const sample = document.createElement("div");
         sample.className = "sample inputs";
