@@ -23,6 +23,7 @@ with open(out_file, "w", encoding="utf-8") as f:
     header, main { max-width: 900px; margin: 0 auto; padding: 16px; }
     header h1 { font-size: 1.4rem; margin: 0 0 8px; }
     header {  position: sticky;  top: 0;  z-index: 1000;  background: #fff;  border-bottom: 1px solid #e5e5e5; }
+    @media (prefers-color-scheme: dark) {  header {    background: #0b0b0b;    border-bottom-color: #222;  }}
     .controls { display: flex; flex-wrap: wrap; gap: var(--gap); align-items: center; }
     .controls label { display: flex; align-items: center; gap: 8px; }
     input[type=number] { width: 90px; padding: 6px 8px; }
